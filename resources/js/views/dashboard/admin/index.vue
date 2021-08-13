@@ -1,10 +1,10 @@
 <template>
-  <div class="dashboard-editor-container">
-    <github-corner style="position: absolute; top: 0px; border: 0; right: 0;" />
+  <div v-loading="loading" class="dashboard-editor-container">
+    <!-- <github-corner style="position: absolute; top: 0px; border: 0; right: 0;" /> -->
 
-    <panel-group @handleSetLineChartData="handleSetLineChartData" />
+    <panel-group :total_membership="total_membership" @handleSetLineChartData="handleSetLineChartData" />
 
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+    <!-- <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
       <line-chart :chart-data="lineChartData" />
     </el-row>
 
@@ -24,9 +24,9 @@
           <bar-chart />
         </div>
       </el-col>
-    </el-row>
+    </el-row> -->
 
-    <el-row :gutter="8">
+    <!--  <el-row :gutter="8">
       <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 24}" :lg="{span: 12}" :xl="{span: 12}" style="padding-right:8px;margin-bottom:30px;">
         <transaction-table />
       </el-col>
@@ -36,20 +36,25 @@
       <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 6}" :xl="{span: 6}" style="margin-bottom:30px;">
         <box-card />
       </el-col>
-    </el-row>
+    </el-row> -->
   </div>
 </template>
 
 <script>
-import GithubCorner from '@/components/GithubCorner';
+// import GithubCorner from '@/components/GithubCorner';
 import PanelGroup from './components/PanelGroup';
-import LineChart from './components/LineChart';
-import RaddarChart from './components/RaddarChart';
-import PieChart from './components/PieChart';
-import BarChart from './components/BarChart';
-import TransactionTable from './components/TransactionTable';
-import TodoList from './components/TodoList';
-import BoxCard from './components/BoxCard';
+// import LineChart from './components/LineChart';
+// import RaddarChart from './components/RaddarChart';
+// import PieChart from './components/PieChart';
+// import BarChart from './components/BarChart';
+// import TransactionTable from './components/TransactionTable';
+// import TodoList from './components/TodoList';
+// import BoxCard from './components/BoxCard';
+
+/* additionals */
+
+import Resource from '@/api/resource';
+const membershipResource = new Resource('membership');
 
 const lineChartData = {
   newVisitis: {
@@ -73,22 +78,42 @@ const lineChartData = {
 export default {
   name: 'DashboardAdmin',
   components: {
-    GithubCorner,
+    // GithubCorner,
     PanelGroup,
-    LineChart,
-    RaddarChart,
-    PieChart,
-    BarChart,
-    TransactionTable,
-    TodoList,
-    BoxCard,
+    // LineChart,
+    // RaddarChart,
+    // PieChart,
+    // BarChart,
+    // TransactionTable,
+    // TodoList,
+    // BoxCard,
   },
   data() {
     return {
       lineChartData: lineChartData.newVisitis,
+      loading: false,
+      total_membership: 0,
+      listQuery: {
+        page: 1,
+        limit: 20,
+        status: 'PENDING',
+        type: undefined,
+        sort: '+created_at',
+      },
     };
   },
+  created() {
+    this.getMembershipData();
+  },
   methods: {
+    async getMembershipData() {
+      this.loading = true;
+      const { data } = await membershipResource.list(this.listQuery);
+      if (data[0].status !== 'NONE'){
+        this.total_membership = data[0].memberships.data.length;
+      }
+      this.loading = false;
+    },
     handleSetLineChartData(type) {
       this.lineChartData = lineChartData[type];
     },

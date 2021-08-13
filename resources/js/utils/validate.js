@@ -45,11 +45,61 @@ export function validAlphabets(str) {
 }
 
 /**
+ * Check if a string contains only alphabet
+ * @param {String} str
+ * @param {Boolean}
+ */
+export function validAddress(str) {
+  const reg = /^[A-Za-z0-9_ #,.]+$/;
+  return reg.test(str);
+}
+
+/**
+ * Check if a string contains special characters
+ * @param {String} str
+ * @param {Boolean}
+ */
+export function noSpecialCharacters(str) {
+  const reg = /^[A-Za-z0-9_ #]+$/;
+  return reg.test(str);
+}
+
+/**
+ * Check if a string contains numbers
+ * @param {String} str
+ * @param {Boolean}
+ */
+export function validNumber(str) {
+  const reg = /^([0-9]+\.?[0-9]*|\.[0-9]+)$/;
+  return reg.test(str);
+}
+
+/**
+ * Check if a string contains only valid name (alphabet and space)
+ * @param {String} str
+ * @param {Boolean}
+ */
+export function validName(str) {
+  const reg = /^[A-Za-z ]+$/;
+  return reg.test(str);
+}
+
+/**
  * Validate an email address
  * @param {String} email
  * @return {Boolean}
  */
 export function validEmail(email) {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const re = /^([\w-]+\.)*?[\w-]+@[\w-]+\.([\w-]+\.)*?[\w]+$/;
   return re.test(email);
+}
+
+/**
+ * Validate an phone number
+ * @param {String} phone_number
+ * @return {Boolean}
+ */
+export function validPhone(phone_number) {
+  const re = /^(09|\+639)\d{9}$/;
+  return re.test(phone_number);
 }

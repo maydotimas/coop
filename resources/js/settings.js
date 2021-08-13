@@ -4,7 +4,7 @@ export default {
   /**
    * @type {String}
    */
-  title: 'Laravue Admin',
+  title: 'LBCC Online System',
   theme: variables.theme,
 
   /**
@@ -17,7 +17,7 @@ export default {
    * @type {boolean} true | false
    * @description Whether need tagsView
    */
-  tagsView: true,
+  tagsView: false,
 
   /**
    * @type {boolean} true | false

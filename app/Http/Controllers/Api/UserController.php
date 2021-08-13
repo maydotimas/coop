@@ -20,6 +20,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Validator;
 
 /**
@@ -34,33 +35,42 @@ class UserController extends BaseController
     /**
      * Display a listing of the user resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response|ResourceCollection
      */
     public function index(Request $request)
     {
-        $searchParams = $request->all();
-        $userQuery = User::query();
-        $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
-        $role = Arr::get($searchParams, 'role', '');
-        $keyword = Arr::get($searchParams, 'keyword', '');
+        $currentUser = Auth::user();
+        if ($currentUser->isAdmin()) {
+            $searchParams = $request->all();
+            $userQuery = User::query();
+            $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
+            $role = Arr::get($searchParams, 'role', '');
+            $keyword = Arr::get($searchParams, 'keyword', '');
 
-        if (!empty($role)) {
-            $userQuery->whereHas('roles', function($q) use ($role) { $q->where('name', $role); });
+            if (!empty($role)) {
+                $userQuery->whereHas('roles', function ($q) use ($role) {
+                    $q->where('first_name', $role)->orWhere('last_name', 'LIKE', '%' . $role . '%');
+                });
+            }
+
+            if (!empty($keyword)) {
+                $userQuery->where('first_name', 'LIKE', '%' . $keyword . '%');
+                $userQuery->orWhere('last_name', 'LIKE', '%' . $keyword . '%');
+                $userQuery->orWhere('email', 'LIKE', '%' . $keyword . '%');
+            }
+
+            return UserResource::collection($userQuery->paginate($limit));
+        } else {
+            $user = User::where('id', $currentUser->id)->get();
+            return UserResource::make($user);
         }
-
-        if (!empty($keyword)) {
-            $userQuery->where('name', 'LIKE', '%' . $keyword . '%');
-            $userQuery->orWhere('email', 'LIKE', '%' . $keyword . '%');
-        }
-
-        return UserResource::collection($userQuery->paginate($limit));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -71,7 +81,7 @@ class UserController extends BaseController
                 $this->getValidationRules(),
                 [
                     'password' => ['required', 'min:6'],
-                    'confirmPassword' => 'same:password',
+                    //'confirmPassword' => 'same:password',
                 ]
             )
         );
@@ -81,12 +91,20 @@ class UserController extends BaseController
         } else {
             $params = $request->all();
             $user = User::create([
-                'name' => $params['name'],
+                'first_name' => $params['first_name'],
+                'last_name' => $params['last_name'],
                 'email' => $params['email'],
                 'password' => Hash::make($params['password']),
+                'status' => '0',
+                'verification_token' => Hash::make($params['email']),
             ]);
             $role = Role::findByName($params['role']);
             $user->syncRoles($role);
+
+            Mail::send('emails.welcome_email', ['user' => $user], function ($m) use ($user) {
+                $m->from(env('MAIL_USERNAME','admin@mail.com'),env('MAIL_FROM_NAME','SYSTEM ADMIN'));
+                $m->to($user->email, $user->first_name)->subject('Please Confirm Membership Application');
+            });
 
             return new UserResource($user);
         }
@@ -95,7 +113,7 @@ class UserController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  User $user
+     * @param User $user
      * @return UserResource|\Illuminate\Http\JsonResponse
      */
     public function show(User $user)
@@ -107,7 +125,7 @@ class UserController extends BaseController
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param User    $user
+     * @param User $user
      * @return UserResource|\Illuminate\Http\JsonResponse
      */
     public function update(Request $request, User $user)
@@ -137,7 +155,8 @@ class UserController extends BaseController
                 return response()->json(['error' => 'Email has been taken'], 403);
             }
 
-            $user->name = $request->get('name');
+            $user->first_name = $request->get('first_name');
+            $user->last_name = $request->get('last_name');
             $user->email = $email;
             $user->save();
             return new UserResource($user);
@@ -148,7 +167,7 @@ class UserController extends BaseController
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param User    $user
+     * @param User $user
      * @return UserResource|\Illuminate\Http\JsonResponse
      */
     public function updatePermissions(Request $request, User $user)
@@ -163,7 +182,7 @@ class UserController extends BaseController
 
         $permissionIds = $request->get('permissions', []);
         $rolePermissionIds = array_map(
-            function($permission) {
+            function ($permission) {
                 return $permission['id'];
             },
 
@@ -179,7 +198,7 @@ class UserController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  User $user
+     * @param User $user
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
@@ -222,12 +241,32 @@ class UserController extends BaseController
     private function getValidationRules($isNew = true)
     {
         return [
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'email' => $isNew ? 'required|email|unique:users' : 'required|email',
             'roles' => [
                 'required',
                 'array'
             ],
         ];
+    }
+
+    public function verify(Request $request){
+        $params = $request->all();
+        $token = $params['token'];
+        $user = User::where('verification_token',$token)->get();
+        if(!$user){
+            return new JsonResponse([
+                ['status'=>'error']
+            ]);
+        } else {
+            $verify_user = User::find($user[0]->id);
+            $verify_user->verified = 1;
+            $verify_user->status = 1;
+            $verify_user->save();
+            return new JsonResponse([
+                ['status'=>'success']
+            ]);
+        }
     }
 }

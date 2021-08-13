@@ -20,6 +20,10 @@ use \App\Laravue\Acl;
 
 Route::namespace('Api')->group(function() {
     Route::post('auth/login', 'AuthController@login');
+    Route::post('users/register', 'UserController@store');
+    Route::get('users/verify', 'UserController@verify');
+
+    /*Authenticated routes*/
     Route::group(['middleware' => 'auth:sanctum'], function () {
         // Auth routes
         Route::get('auth/user', 'AuthController@user');
@@ -39,7 +43,20 @@ Route::namespace('Api')->group(function() {
         Route::get('users/{user}/permissions', 'UserController@permissions')->middleware('permission:' . Acl::PERMISSION_PERMISSION_MANAGE);
         Route::put('users/{user}/permissions', 'UserController@updatePermissions')->middleware('permission:' .Acl::PERMISSION_PERMISSION_MANAGE);
         Route::get('roles/{role}/permissions', 'RoleController@permissions')->middleware('permission:' . Acl::PERMISSION_PERMISSION_MANAGE);
+
+        /* Additional Routes below here */
+
+        Route::apiResource('profile', 'ProfileController');
+        Route::apiResource('membership', 'MembershipController');
+        Route::apiResource('settings', 'SettingController');
+
     });
+
+    /* Location Routes */
+    Route::apiResource('regions', 'RegionController');
+    Route::apiResource('provinces', 'ProvinceController');
+    Route::apiResource('cities', 'CityController');
+    Route::apiResource('barangays', 'BarangayController');
 });
 
 // Fake APIs

@@ -14,6 +14,20 @@ class Resource {
       params: query,
     });
   }
+  verify(query) {
+    return request({
+      url: '/' + this.uri + '/verify',
+      method: 'get',
+      params: query,
+    });
+  }
+  register(query) {
+    return request({
+      url: '/' + this.uri + '/register',
+      method: 'post',
+      data: query,
+    });
+  }
   get(id) {
     return request({
       url: '/' + this.uri + '/' + id,

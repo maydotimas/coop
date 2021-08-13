@@ -25,7 +25,7 @@
 
       <el-table-column align="center" label="Name">
         <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ scope.row.first_name }} {{ scope.row.last_name }}</span>
         </template>
       </el-table-column>
 

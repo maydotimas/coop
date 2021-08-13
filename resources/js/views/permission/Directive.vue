@@ -130,7 +130,7 @@
         <el-tab-pane v-if="checkRole(['admin','editor'])" label="Admin-OR-Editor">
           Both admin or editor can see this
           <el-tag class="permission-sourceCode" type="info">
-            v-if="checkRole(['admin','editor'])"
+            v-if="v(['admin','editor'])"
           </el-tag>
         </el-tab-pane>
       </el-tabs>

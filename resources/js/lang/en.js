@@ -70,6 +70,10 @@ export default {
     administrator: 'Administrator',
     users: 'Users',
     userProfile: 'User Profile',
+    membershipApplication: 'Membership',
+    myMembershipApplication: 'My Membership',
+    addMembershipApplication: 'Create Application',
+    editMembershipApplication: 'Update Application',
   },
   navbar: {
     logOut: 'Log Out',
