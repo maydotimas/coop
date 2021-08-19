@@ -15,29 +15,50 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $admin = User::create([
-            'name' => 'Admin',
+            'first_name' => 'Admin',
+            'last_name' => 'Admin',
             'email' => 'admin@laravue.dev',
             'password' => Hash::make('laravue'),
+            'status' => '1',
+            'verified' => '1',
         ]);
         $manager = User::create([
-            'name' => 'Manager',
+            'first_name' => 'Manager',
+            'last_name' => 'Manager',
             'email' => 'manager@laravue.dev',
             'password' => Hash::make('laravue'),
+            'status' => '1',
+            'verified' => '1',
         ]);
         $editor = User::create([
-            'name' => 'Editor',
+            'first_name' => 'Editor',
+            'last_name' => 'Editor',
             'email' => 'editor@laravue.dev',
             'password' => Hash::make('laravue'),
+            'status' => '1',
+            'verified' => '1',
         ]);
         $user = User::create([
-            'name' => 'User',
+            'first_name' => 'User',
+            'last_name' => 'User',
             'email' => 'user@laravue.dev',
             'password' => Hash::make('laravue'),
+            'status' => '1',
+            'verified' => '1',
         ]);
         $visitor = User::create([
-            'name' => 'Visitor',
+            'first_name' => 'Visitor',
+            'last_name' => 'Visitor',
             'email' => 'visitor@laravue.dev',
             'password' => Hash::make('laravue'),
+            'status' => '1',
+            'verified' => '1',
+        ]);
+
+       \App\Laravue\Models\Setting::create([
+            'share_rate' => '1000',
+            'membership_fee' => '5000',
+            'is_active' => 1,
         ]);
 
         $adminRole = Role::findByName(\App\Laravue\Acl::ROLE_ADMIN);
@@ -50,6 +71,12 @@ class DatabaseSeeder extends Seeder
         $editor->syncRoles($editorRole);
         $user->syncRoles($userRole);
         $visitor->syncRoles($visitorRole);
-        $this->call(UsersTableSeeder::class);
+        //$this->call(UsersTableSeeder::class);
+        $this->call(MembershipPermission::class);
+        $this->call(RegionSeeder::class);
+        $this->call(ProvinceSeeder::class);
+        $this->call(CitySeeder::class);
+        $this->call(BarangaySeeder::class);
+
     }
 }

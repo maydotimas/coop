@@ -1,19 +1,22 @@
 <template>
   <el-row :gutter="40" class="panel-group">
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col :xs="12" :sm="12" :lg="7" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('newVisitis')">
         <div class="card-panel-icon-wrapper icon-people">
           <svg-icon icon-class="peoples" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            New Visits
+            Membership Applications
           </div>
-          <count-to :start-val="0" :end-val="102400" :duration="2600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="total_membership" :duration="2600" class="card-panel-num pull-right" />
+        </div>
+        <div class="card-panel-footer">
+          <el-button class="pull-right" @click="view_membership">Review Applications</el-button>
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <!--<el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('messages')">
         <div class="card-panel-icon-wrapper icon-message">
           <svg-icon icon-class="message" class-name="card-panel-icon" />
@@ -51,7 +54,7 @@
           <count-to :start-val="0" :end-val="13600" :duration="3600" class="card-panel-num" />
         </div>
       </div>
-    </el-col>
+    </el-col>-->
   </el-row>
 </template>
 
@@ -62,9 +65,13 @@ export default {
   components: {
     CountTo,
   },
+  props: ['totalMembership'],
   methods: {
     handleSetLineChartData(type) {
       this.$emit('handleSetLineChartData', type);
+    },
+    view_membership(){
+      this.$router.push({ path: '/membership/' }, onAbort => {});
     },
   },
 };
@@ -77,7 +84,7 @@ export default {
     margin-bottom: 32px;
   }
   .card-panel {
-    height: 108px;
+    min-height: 108px;
     cursor: pointer;
     font-size: 12px;
     position: relative;
@@ -94,7 +101,7 @@ export default {
          background: #40c9c6;
       }
       .icon-message {
-        background: #36a3f7;
+        background: #36f740;
       }
       .icon-money {
         background: #f4516c;
@@ -107,7 +114,7 @@ export default {
       color: #40c9c6;
     }
     .icon-message {
-      color: #36a3f7;
+      color: #36f740;
     }
     .icon-money {
       color: #f4516c;
@@ -131,6 +138,7 @@ export default {
       font-weight: bold;
       margin: 26px;
       margin-left: 0px;
+      margin-bottom: 0 !important;
       .card-panel-text {
         line-height: 18px;
         color: rgba(0, 0, 0, 0.45);
@@ -140,6 +148,12 @@ export default {
       .card-panel-num {
         font-size: 20px;
       }
+    }
+    .card-panel-footer {
+      width: 100%;
+      float: right;
+      font-weight: bold;
+      margin: 2% 5%;
     }
   }
 }

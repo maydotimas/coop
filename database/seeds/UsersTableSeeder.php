@@ -75,7 +75,8 @@ class UsersTableSeeder extends Seeder
                 Acl::ROLE_VISITOR,
             ]);
             $user = \App\Laravue\Models\User::create([
-                'name' => $fullName,
+                'first_name' => $fullName,
+                'last_name' => '',
                 'email' => strtolower($name) . '@laravue.dev',
                 'password' => \Illuminate\Support\Facades\Hash::make('laravue'),
             ]);

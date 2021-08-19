@@ -2,29 +2,47 @@
   <div class="login">
     <div class="login-container">
       <div class="login-image">
-        <div class="photo-credit">
-          <h4>Danang - Vietnam</h4>
-          <span>Photo by Kiril Dobrev on Unsplash</span>
-        </div>
+        <el-carousel class="carousel" height="100%">
+          <el-carousel-item>
+            <div class="item">
+              <img class="item__image" src="/images/1.jpeg" alt="">
+            </div>
+          </el-carousel-item>
+          <el-carousel-item>
+            <div class="item">
+              <img class="item__image" src="/images/2.jpeg" alt="">
+            </div>
+          </el-carousel-item>
+          <el-carousel-item>
+            <div class="item">
+              <img class="item__image" src="/images/3.jpg" alt="">
+            </div>
+          </el-carousel-item>
+          <el-carousel-item>
+            <div class="item">
+              <img class="item__image" src="/images/4.jpg" alt="">
+            </div>
+          </el-carousel-item>
+        </el-carousel>
       </div>
       <div class="login-content">
-        <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+        <img
+          class="logo"
+          alt="Laravue"
+          :src="logo"
+        >
+        <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" label-position="left">
           <div class="title-wrap">
-            <img
-              class="logo"
-              alt="Laravue"
-              :src="logo"
-            >
+
             <h3 class="title">
-              {{ $t('login.title') }}
-              <lang-select class="set-language" />
+              Login Your Account
             </h3>
           </div>
           <el-form-item prop="email">
             <span class="svg-container">
-              <svg-icon icon-class="user" />
+              <svg-icon icon-class="email" />
             </span>
-            <el-input v-model="loginForm.email" name="email" type="text" auto-complete="on" :placeholder="$t('login.email')" />
+            <el-input v-model="loginForm.email" name="email" type="text" placeholder="Email Address" />
           </el-form-item>
           <el-form-item prop="password">
             <span class="svg-container">
@@ -33,8 +51,7 @@
             <el-input
               v-model="loginForm.password"
               name="password"
-              auto-complete="on"
-              placeholder="password"
+              placeholder="Password"
               :type="pwdType"
               @keyup.enter.native="handleLogin"
             />
@@ -48,8 +65,7 @@
             </el-button>
           </el-form-item>
           <div class="tips">
-            <span style="margin-right:20px;">Email: admin@laravue.dev</span>
-            <span>Password: laravue</span>
+            <a style="margin-right:20px;" @click="showRegForm">Register</a>
           </div>
         </el-form>
       </div>
@@ -58,7 +74,6 @@
 </template>
 
 <script>
-import LangSelect from '@/components/LangSelect';
 import { validEmail } from '@/utils/validate';
 import { csrf } from '@/api/auth';
 
@@ -66,17 +81,16 @@ const logo = require('@/assets/login/logo.png').default;
 
 export default {
   name: 'Login',
-  components: { LangSelect },
   data() {
     const validateEmail = (rule, value, callback) => {
-      if (!validEmail(value)) {
+      if (value !== '' && !validEmail(value)) {
         callback(new Error('Please enter the correct email'));
       } else {
         callback();
       }
     };
     const validatePass = (rule, value, callback) => {
-      if (value.length < 4) {
+      if (value !== '' && value.length < 4) {
         callback(new Error('Password cannot be less than 4 digits'));
       } else {
         callback();
@@ -84,8 +98,8 @@ export default {
     };
     return {
       loginForm: {
-        email: 'admin@laravue.dev',
-        password: 'laravue',
+        email: '',
+        password: '',
       },
       loginRules: {
         email: [{ required: true, trigger: 'blur', validator: validateEmail }],
@@ -93,7 +107,7 @@ export default {
       },
       loading: false,
       pwdType: 'password',
-      redirect: undefined,
+      redirect: '/dashboard',
       otherQuery: {},
       logo: logo,
     };
@@ -102,8 +116,11 @@ export default {
     $route: {
       handler: function(route) {
         const query = route.query;
-        if (query) {
+        if (query && (query.redirect !== '/verify' && query.redirect !== '/register')) {
           this.redirect = query.redirect;
+          this.otherQuery = this.getOtherQuery(query);
+        } else {
+          this.redirect = '/dashboard';
           this.otherQuery = this.getOtherQuery(query);
         }
       },
@@ -111,6 +128,9 @@ export default {
     },
   },
   methods: {
+    showRegForm(){
+      this.$router.push({ path: '/register' }, onAbort => {});
+    },
     showPwd() {
       if (this.pwdType === 'password') {
         this.pwdType = '';
@@ -153,7 +173,6 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 $bg:#2d3a4b;
 $light_gray:#eee;
-
 /* reset element-ui css */
 .login-container {
   .el-input {
@@ -181,10 +200,24 @@ $light_gray:#eee;
     color: #454545;
   }
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: white;
+  -webkit-box-shadow: 0 0 0px 1000px #000 inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 </style>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
 $bg:#2d3a4b;
 $dark_gray:#889aa4;
 $light_gray:rgb(7, 6, 6);
@@ -192,8 +225,28 @@ $bgColor: #054b5d;
 $brown: #B27C66;
 $textColor:#eee;
 
+.carousel {
+  width: 100%;
+  overflow:hidden;
+}
+
+.item__image{
+  height: 20%;
+  margin-left: -50%;
+}
+
+.logo {
+  display: block;
+  height: auto;
+  width: 30%;
+  margin-bottom: 20px;
+  background-color:whitesmoke;
+  margin: 15% auto;
+  margin-bottom: 2%;
+  border-radius: 50%;
+}
+
 .login {
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,6 +254,7 @@ $textColor:#eee;
   background-color: $bgColor;
   transition: background-color .3s ease-in-out;
   overflow: auto;
+  height:100%;
 
   .login-container {
     background: $bg;
@@ -211,20 +265,13 @@ $textColor:#eee;
     transition: all .3s ease-in-out;
     transform: scale(1);
 
-    .logo {
-      display: block;
-      width: 80px;
-      height: 80px;
-      margin-bottom: 20px;
-    }
-
     .login-image {
       display: flex;
       flex-direction: row;
       justify-content: flex-end;
       overflow: hidden;
       background-color: #303c4b;
-      background-image: url('../../assets/login/login_background.jpg');
+      // background-image: url('../../assets/login/3.png');
       background-position: 50%;
       background-size: cover;
       opacity: 1;
@@ -243,11 +290,12 @@ $textColor:#eee;
 
     .login-form {
       min-width: 320px;
-      padding: 130px 60px;
+      padding: 10% 60px;
       position: relative;
       opacity: 1;
       transition: opacity .3s ease-in-out,padding .2s ease-in-out;
     }
+
     .tips {
       font-size: 14px;
       color: #fff;
@@ -273,7 +321,7 @@ $textColor:#eee;
         font-size: 24px;
         color: $textColor;
         margin: 0px auto 10px auto;
-        text-align: left;
+        text-align: center;
         font-weight: bold;
       }
       .sub-heading {
@@ -300,4 +348,5 @@ $textColor:#eee;
     }
   }
 }
+
 </style>

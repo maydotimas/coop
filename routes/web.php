@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/verify', function () {
+    return view('emails.welcome_email')->with('url','/');
+});
 
 Route::group(['middleware' => 'web'], function () {
     Route::get(env('LARAVUE_PATH'), 'LaravueController@index')->where('any', '.*')->name('laravue');

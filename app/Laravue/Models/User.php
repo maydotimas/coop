@@ -28,7 +28,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password'
+        'first_name','last_name', 'email', 'password', 'verified', 'verification_token'
     ];
 
     /**
@@ -90,6 +90,20 @@ class User extends Authenticatable
      * @return bool
      */
     public function isAdmin(): bool
+    {
+        foreach ($this->roles as $role) {
+            if ($role->isAdmin()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getUserRole(): bool
     {
         foreach ($this->roles as $role) {
             if ($role->isAdmin()) {
